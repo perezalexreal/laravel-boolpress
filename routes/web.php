@@ -19,7 +19,20 @@ use Illuminate\Support\Facades\Route;
 
 Auth::routes();
 
-Route::get('/admin', 'App\Http\Controllers\Admin\HomeController@index')->name('admin.home');
+
+Route::middleware("auth")
+  ->namespace("App\Http\Controllers\Admin")
+  ->prefix("admin")
+  ->name("admin.")
+  ->group(function () {
+    Route::get('/', 'HomeController@index')->name('home');
+    // Route::get('/products', 'ProductController@index')->name('product.index');
+    // Route::get('/products/create', 'ProductController@index')->name('product.create');
+    // Route::get('/products/edit', 'ProductController@index')->name('product.edit');
+
+    Route::resource("posts", "PostController");
+  });
+
 
 
 Route::get(" {any?} ", function(){

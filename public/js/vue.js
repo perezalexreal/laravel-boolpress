@@ -18,6 +18,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({});
 
 /***/ }),
@@ -532,7 +534,13 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", [_c("h1", [_vm._v(" Ecco vue.js insieme a Laravel ")])])
+    return _c("div", [
+      _c("h1", [_vm._v(" Ecco vue.js insieme a Laravel ")]),
+      _vm._v(" "),
+      _c("a", { attrs: { href: "/login" } }, [_vm._v("login")]),
+      _vm._v(" "),
+      _c("a", { attrs: { href: "/register" } }, [_vm._v("Register")]),
+    ])
   },
 ]
 render._withStripped = true

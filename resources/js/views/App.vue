@@ -1,6 +1,8 @@
 <template>
   <div>
       <h1> Ecco vue.js insieme a Laravel </h1>
+      <a href="/login">login</a>
+      <a href="/register">Register</a>
   </div>
 </template>
 
