@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class PostController extends Controller
@@ -16,7 +18,9 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::all();
+       
+        // se voglio vedere solo i miei
+        $posts = Post::where("user_id",Auth::user()->id)->get(); // da chiedere;
 
         return view("admin.posts.index", compact("posts"));
     }
@@ -28,7 +32,9 @@ class PostController extends Controller
      */
     public function create()
     {
-        return view("admin.posts.create");
+        $categories = Category::all();
+
+        return view("admin.posts.create", compact("categories"));
     }
 
     /**
@@ -41,25 +47,29 @@ class PostController extends Controller
     {
         $data = $request->validate([
             "title"=> "required | min:5",
-            "content"=> "required | min:25"
+            "content"=> "required | min:25",
+            "category_id"=> "nullable"
         ]);
 
+        
         $post = new Post();
         $post->fill($data);
 
-        $slug = Str::slug($post->title);
-        $exists = Post::where("slug", $slug)->first();
-        $counter= 1;
-        while($exists){
-            $newSlug = $slug . "-" . $counter;
-            $counter++;
-            $exists = Post::where("slug", $newSlug)->first();
-            if(!$exists){
-                $slug = $newSlug;
-            }
-        }
+        // $slug = Str::slug($post->title);
+        // $exists = Post::where("slug", $slug)->first();
+        // $counter= 1;
+        // while($exists){
+        //     $newSlug = $slug . "-" . $counter;
+        //     $counter++;
+        //     $exists = Post::where("slug", $newSlug)->first();
+        //     if(!$exists){
+        //         $slug = $newSlug;
+        //     }
+        // }
         
-        $post->slug = $slug;
+
+        $post->slug = $this->generateUniqueSlug($post->title);
+        $post->user_id = Auth::user()->id;
         $post->save();
 
         return redirect()->route('admin.posts.index');
@@ -71,9 +81,12 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($slug)
     {
-        //
+        $post = Post::where("slug", $slug)->first();
+
+        
+        return view("admin.posts.show", compact("post"));
     }
 
     /**
@@ -82,9 +95,16 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($slug)
     {
-        //
+        $categories = Category::all();
+
+        $post = Post::where("slug",$slug)->first();
+
+        return view("admin.posts.edit", [
+          "post" =>  $post,
+           "categories"=>  $categories
+        ]);
     }
 
     /**
@@ -96,7 +116,21 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $data = $request->validate([
+            "title"=> "required | min:5",
+            "content"=> "required | min:25",
+            "category_id"=> "nullable"
+        ]);
+
+        $post = Post::findOrFail($id);
+
+        if($data["title"] !== $post->title){
+            $data["slug"] =  $this->generateUniqueSlug($data["title"]);
+        }
+
+        $post->update($data);
+
+        return redirect()->route('admin.posts.show', $post->slug);
     }
 
     /**
@@ -108,5 +142,21 @@ class PostController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+
+    public function generateUniqueSlug($postTitle){
+        $slug = Str::slug($postTitle);
+        $exists = Post::where("slug", $slug)->first();
+        $counter= 1;
+        while($exists){
+            $newSlug = $slug . "-" . $counter;
+            $counter++;
+            $exists = Post::where("slug", $newSlug)->first();
+            if(!$exists){
+                $slug = $newSlug;
+            }
+        }
+        return $slug;
     }
 }

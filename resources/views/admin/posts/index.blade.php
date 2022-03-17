@@ -13,9 +13,16 @@
                 <div class="card-body">
                     <ul class="list-group">
                     @foreach ($posts as $post )
-                    <li class="list-group-item">{{$post->title}}
+                    <a  class="d-flex flex-column text-decoration-none" href="{{ route('admin.posts.show', $post-> slug)}}"class="ms-auto">  <li class="list-group-item"><h3>{{$post->title}}</h3>
                         {{-- <a href="{{ route('admin.posts.show', $post->slug) }}">Mostra</a> --}}
+                        <div  class="d-flex flex-column ">       
+                        <div><small class="fst-italic">{{ $post->created_at }} - {{ $post->user->name }} - {{ isset($post->category) ? $post->category->code : "senza categoria" }}</small></div>
+                    </div>
+
+              
+         
                       </li>
+                    </a>
                       @endforeach
                     </ul>
                 </div>
