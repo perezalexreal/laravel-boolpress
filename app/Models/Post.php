@@ -11,7 +11,8 @@ class Post extends Model
         "title",
         "content",
         "slug",
-        "category_id"
+        "category_id",
+        "coverimg"
     ];
 
     public function user() {
@@ -21,5 +22,8 @@ class Post extends Model
         return $this->belongsTo("App\Models\Category");
       }
 
+    public function tags(){
+      return $this->belongsToMany("App\Models\Tag");
+    }    
 
 }

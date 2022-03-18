@@ -20,10 +20,20 @@
                         <h3>{{$post->title}}</h3>
                         <p>{{$post->content}}</p>
                         <div  class="d-flex flex-column ">       
-                            <div><small class="fst-italic">{{ $post->created_at }} - {{ $post->user->name }} - {{ isset($post->category) ? $post->category->code : "senza categoria" }}</small></div>
+                            <div><small class="fst-italic">{{ $post->user->name }} - {{ isset($post->category) ? $post->category->code : "senza categoria" }}</small></div>
                         </div>
                         {{-- <a href="{{ route('admin.posts.show', $post->slug) }}">Mostra</a> --}}
                         {{-- <a href="{{ route('admin.posts.show', $post->slug)}}"> Vedi post</a> --}}
+
+                        @php
+                        // use Carbon\Carbon;
+                        $dateFormat = 'd/m/Y H:i';
+                      @endphp
+        
+                      Data creazione: {{ $post->created_at->format($dateFormat) }}<br>
+                 
+                      <i> Ultima modifica: {{ $post->updated_at->format($dateFormat) }} ({{ $post->updated_at->diffForHumans(date(0)) }})</i>
+
                       </li>
                     </ul>
                 </div>

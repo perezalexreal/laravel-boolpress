@@ -1,34 +1,45 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header d-flex">Lista dei Post
-                    <a href="{{ route('admin.posts.create')}}" class="ms-auto"> Aggiungi un post</a>
-                </div>
-      
-                
-                <div class="card-body">
-                    <ul class="list-group">
-                    @foreach ($posts as $post )
-                    <a  class="d-flex flex-column text-decoration-none" href="{{ route('admin.posts.show', $post-> slug)}}"class="ms-auto">  <li class="list-group-item"><h3>{{$post->title}}</h3>
-                        {{-- <a href="{{ route('admin.posts.show', $post->slug) }}">Mostra</a> --}}
-                        <div  class="d-flex flex-column ">       
-                        <div><small class="fst-italic">{{ $post->created_at }} - {{ $post->user->name }} - {{ isset($post->category) ? $post->category->code : "senza categoria" }}</small></div>
-                    </div>
-
-              
-         
-                      </li>
-                    </a>
-                      @endforeach
-                    </ul>
-                </div>
-
-            </div>
-        </div>
-    </div>
+<div class="card-header d-flex mb-3 bg-transparent">Lista dei Post
+    <a href="{{ route('admin.posts.create')}}" class="ms-auto"> Aggiungi un post</a>
 </div>
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    @foreach ($posts as $post )
+   
+       
+    <div class="col">
+        <a class="text-decoration-none" href="{{ route('admin.posts.show', $post-> slug)}}">
+      <div class="card  text-black">
+          <div class="position-absolute bg-white" style="right:0; border-radius: 50px; margin: 10px">
+            @include('partials.deleteBtn', [
+                'id'=> $post->id,
+                'route'=> "admin.posts.destroy"
+            ])
+          </div>
+          @php
+          // use Carbon\Carbon;
+          $dateFormat = 'd/m/Y';
+        @endphp
+        
+        <img src=" {{ $post->coverImg ?? null}}" class="card-img-top" alt="...">
+        <i class="card-header"> {{ isset($post->category) ? $post->category->code : "Nessuna categoria" }}</i> 
+        <div class="card-body">
+          <h5 class="card-title">{{$post->title}}</h5>
+          <p class="card-text ">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+          <p  class="card-footer"> 
+            <i>Creato il {{ $post->created_at->format($dateFormat) }} da {{ $post->user->name }} </i>        
+            <i> Modificato ({{ $post->updated_at->diffForHumans(date(0)) }})</i></p>
+        </div>
+      </div>
+    </a>
+    </div>
+
+ 
+
+
+
+
+@endforeach
+  </div>
 @endsection
