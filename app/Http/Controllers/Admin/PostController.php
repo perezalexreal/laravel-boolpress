@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NewSiteContactMail;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\Tag;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PostController extends Controller
@@ -24,7 +27,9 @@ class PostController extends Controller
     {
        
         // se voglio vedere solo i miei
-        $posts = Post::where("user_id",Auth::user()->id)->get(); // da chiedere;
+        $posts = Post::where("user_id",Auth::user()->id)
+        ->withTrashed()
+        ->get(); // da chiedere;
 
         return view("admin.posts.index", compact("posts"));
     }
@@ -57,6 +62,7 @@ class PostController extends Controller
         $data = $request->validate([
             "title"=> "required | min:5",
             "content"=> "required | min:25",
+            "coverImg"=>"nullable  | max: 5000",
             "category_id"=> "nullable | exists:categories,id",
             "tags"=> "nullable| exists:tags,id"
         ]);
@@ -76,10 +82,14 @@ class PostController extends Controller
         //         $slug = $newSlug;
         //     }
         // }
-        
 
         $post->slug = $this->generateUniqueSlug($post->title);
         $post->user_id = Auth::user()->id;
+
+        if(key_exists("coverImg", $data)){
+            $post->coverImg  = Storage::put("postCovers", $data["coverImg"]);
+        }
+
         $post->save();
 
         // $post->tags()->attach($data["tags"]);
@@ -90,6 +100,8 @@ class PostController extends Controller
         }
        // carica tutto, nel caso di create meglio questo
 
+       Mail::to("admin@sito.com")->send(new NewSiteContactMail($post));
+;
         return redirect()->route('admin.posts.index');
     }
 
@@ -101,7 +113,7 @@ class PostController extends Controller
      */
     public function show($slug)
     {
-        $post = Post::where("slug", $slug)->first();
+        $post = Post::withTrashed()->where("slug", $slug)->first();
 
         
         return view("admin.posts.show", compact("post"));
@@ -137,9 +149,14 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
+
+        // $allData = $request->all();
+
+        // dd($allData);
         $data = $request->validate([
             "title"=> "required | min:5",
             "content"=> "required | min:25",
+            "coverImg"=>"nullable | image | max: 5000",
             "category_id"=> "nullable | exists:categories,id",
             "tags"=> "nullable | exists:tags,id"
         ]);
@@ -153,14 +170,26 @@ class PostController extends Controller
         if($data["title"] !== $post->title){
             $data["slug"] =  $this->generateUniqueSlug($data["title"]);
         }
+        
+        $post->update($data);
+        // se utente sta caricando un file
+        
+        if(key_exists("coverImg", $data)){
+            if ($post->coverImg) {
+                Storage::delete($post->coverImg);
+              }
 
-
+            $coverImg = Storage::put("postCovers", $data["coverImg"]);
+            // $coverImg = Storage::disk('public')->put("postCovers", $data["coverImg"]); altro modo 
+            $post->coverImg = $coverImg;
+            $post->save();
+        }
         // carica solo quello di cui
         // è stato inserito e non tocca
         // quelli che ci sono gia
 
 
-        $post->update($data);
+       
 
 
         if(key_exists("tags", $data)){
@@ -180,12 +209,17 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        $post = Post::findOrFail($id);
+        $post = Post::withTrashed()->findOrFail($id);
         // $post->tafgs()->detach();
 
-        $post->tags()->detach();
+        // $post->tags()->detach();
 
-        $post->delete();
+        if($post->trashed()){
+            $post->tags()->detach(); 
+            $post->forceDelete();   
+        } else {
+            $post->delete(); 
+        }
 
         // POost::destroy($id);
         return  redirect()->route("admin.posts.index");

@@ -11,7 +11,7 @@
       
                 
                 <div class="card-body">
-                    <form action="{{ route('admin.posts.update', $post->id) }}" method="post" class="row g-3">
+                    <form action="{{ route('admin.posts.update', $post->id) }}" method="post" class="row g-3" enctype="multipart/form-data">
                       @csrf
                         @method("put")
                       <div class="mb-3">
@@ -28,6 +28,15 @@
                         @error("content")
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+                      </div>
+                      
+                      <div class="mb-3">
+                        <label class="form-label">URL Immagine</label>
+                        <input type="file" class="form-control @error('coverImg') is-invalid @enderror" name="coverImg"> 
+                        @error("coverImg")
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <span>{{ old("coverImg", $post->coverImg)}}</span>
                       </div>
 
                       <div class="mb-3">

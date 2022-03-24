@@ -30,6 +30,7 @@
           <p  class="card-footer"> 
             <i>Creato il {{ $post->created_at->format($dateFormat) }} da {{ $post->user->name }} </i>        
             <i> Modificato ({{ $post->updated_at->diffForHumans(date(0)) }})</i></p>
+            <i class=""> {{ $post->trashed()}}</i>
         </div>
       </div>
     </a>

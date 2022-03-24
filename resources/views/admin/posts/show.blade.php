@@ -18,6 +18,7 @@
                     <ul class="list-group">
                     <li class="list-group-item">
                         <h3>{{$post->title}}</h3>
+                        <img src="{{ asset("storage/". $post->coverImg) }}" class="img-fluid" alt="">
                         <p>{{$post->content}}</p>
                         <div  class="d-flex flex-column ">       
                             <div><small class="fst-italic">{{ $post->user->name }} - {{ isset($post->category) ? $post->category->code : "senza categoria" }}</small></div>

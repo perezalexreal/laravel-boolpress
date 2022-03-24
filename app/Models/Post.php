@@ -4,15 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Post extends Model
 {
+  use SoftDeletes;
     protected $fillable = [
         "title",
         "content",
+        "coverImg",
         "slug",
         "category_id",
-        "coverimg"
     ];
 
     public function user() {
